@@ -5,6 +5,7 @@
  */
 import type { AddressRow } from './search';
 import { googleMapsDirectionsUrl, googleMapsUrl, hasCoords } from './share';
+import { t } from './i18n';
 
 function esc(str: string): string {
   return str.replace(/[&<>"']/g, (c) => ({
@@ -37,11 +38,11 @@ export function renderRow(
   const dir = hasCoords(row) ? googleMapsDirectionsUrl(row.lat, row.lng) : null;
 
   const actions = [
-    `<button class="btn btn--share" type="button" data-share="${row.object_id}"${hasCoords(row) ? '' : ' disabled'}>Share</button>`,
-    `<button class="btn btn--ghost" type="button" data-copycoords="${row.object_id}"${hasCoords(row) ? '' : ' disabled'}>Copy coords</button>`,
-    maps ? `<a class="btn btn--ghost" href="${maps}" target="_blank" rel="noopener noreferrer">Google Maps</a>` : '',
-    dir ? `<a class="btn btn--ghost" href="${dir}" target="_blank" rel="noopener noreferrer">Directions</a>` : '',
-    `<button class="result__star${bookmarked ? ' is-saved' : ''}" type="button" data-star="${row.object_id}" title="${bookmarked ? 'Remove from saved' : 'Save address'}" aria-label="${bookmarked ? 'Remove from saved' : 'Save address'}">${bookmarked ? '★' : '☆'}</button>`,
+    `<button class="btn btn--share" type="button" data-share="${row.object_id}"${hasCoords(row) ? '' : ' disabled'}>${t('result.share')}</button>`,
+    `<button class="btn btn--ghost" type="button" data-copycoords="${row.object_id}"${hasCoords(row) ? '' : ' disabled'}>${t('result.copyCoords')}</button>`,
+    maps ? `<a class="btn btn--ghost" href="${maps}" target="_blank" rel="noopener noreferrer">${t('result.googleMaps')}</a>` : '',
+    dir ? `<a class="btn btn--ghost" href="${dir}" target="_blank" rel="noopener noreferrer">${t('result.directions')}</a>` : '',
+    `<button class="result__star${bookmarked ? ' is-saved' : ''}" type="button" data-star="${row.object_id}" title="${bookmarked ? t('result.remove') : t('result.save')}" aria-label="${bookmarked ? t('result.remove') : t('result.save')}">${bookmarked ? '★' : '☆'}</button>`,
   ].join('');
 
   // The map panel mounts only inside the selected card; map.ts fills #result-map.

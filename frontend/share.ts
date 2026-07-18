@@ -5,6 +5,7 @@
  */
 
 import type { BookmarkRow } from './storage';
+import { t } from './i18n';
 
 /** A minimal address shape these helpers need. */
 type Coords = Pick<BookmarkRow, 'lat' | 'lng'>;
@@ -23,11 +24,11 @@ export function hasCoords(c: Coords): c is BookmarkRow & { lat: number; lng: num
 
 /** Copy "lat,lng" to the clipboard. Returns a user-facing message (or ''). */
 export async function copyCoords(c: Coords): Promise<string> {
-  if (!hasCoords(c)) return 'No coordinates for this address.';
+  if (!hasCoords(c)) return t('toast.noCoords');
   const text = `${c.lat},${c.lng}`;
   try {
     await navigator.clipboard.writeText(text);
-    return 'Coordinates copied.';
+    return t('toast.coordsCopied');
   } catch {
     window.prompt('Copy coordinates:', text);
     return '';
@@ -36,7 +37,7 @@ export async function copyCoords(c: Coords): Promise<string> {
 
 /** Share an address (Web Share → clipboard → prompt). Returns a toast message or ''. */
 export async function shareAddress(row: Shareable): Promise<string> {
-  if (!hasCoords(row)) return 'No coordinates for this address.';
+  if (!hasCoords(row)) return t('toast.noCoords');
   const { lat, lng } = row;
   const label = row.formatted_en || row.formatted_ar || `${lat}, ${lng}`;
   const url = googleMapsUrl(lat, lng);
@@ -53,7 +54,7 @@ export async function shareAddress(row: Shareable): Promise<string> {
   if (navigator.clipboard) {
     try {
       await navigator.clipboard.writeText(url);
-      return 'Link copied to clipboard.';
+      return t('toast.linkCopied');
     } catch { /* last resort below */ }
   }
   window.prompt('Copy this link:', url);

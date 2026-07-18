@@ -63,8 +63,8 @@
 
       <!-- ───────────── HERO (idle) ───────────── -->
       <section id="hero" class="hero">
-        <h1 class="hero__title">Bahrain Address Finder</h1>
-        <p class="hero__subtitle">Find any address, share a map link, or locate yourself — instantly.</p>
+        <h1 class="hero__title" data-i18n="app.name">Bahrain Address Finder</h1>
+        <p class="hero__subtitle" data-i18n="hero.subtitle">Find any address, share a map link, or locate yourself — instantly.</p>
 
         <!-- Bilingual hidden copy so crawlers index both EN + AR; user-facing text stays as-is -->
         <div class="visually-hidden" lang="ar" dir="rtl">
@@ -81,6 +81,7 @@
             inputmode="search"
             autocomplete="off"
             placeholder="Search building, road, block or area…"
+            data-i18n-ph="search.placeholder"
             dir="auto"
           />
           <span class="search__kbd">⌘&nbsp;K</span>
@@ -90,17 +91,17 @@
 
         <!-- Recent searches appear inside the hero when present -->
         <section id="recents" class="section hidden">
-          <h2 class="section__title">Recent</h2>
+          <h2 class="section__title" data-i18n="section.recent">Recent</h2>
           <div id="recents-row" class="section__row"></div>
         </section>
 
         <!-- Saved/starred addresses appear inside the hero when present -->
         <section id="hero-bookmarks" class="section hidden">
-          <h2 class="section__title">Saved</h2>
+          <h2 class="section__title" data-i18n="section.saved">Saved</h2>
           <div id="hero-bookmarks-row" class="section__row"></div>
         </section>
 
-        <button id="locate-btn" class="btn btn--locate mt-8" type="button" title="Use my location">
+        <button id="locate-btn" class="btn btn--locate mt-8" type="button" title="Use my location" data-i18n="locate">
           📍&nbsp;Locate me
         </button>
       </section>
@@ -117,11 +118,12 @@
             inputmode="search"
             autocomplete="off"
             placeholder="Search…"
+            data-i18n-ph="search.placeholderShort"
             dir="auto"
           />
         </div>
-        <button id="locate-btn-top" class="btn btn--locate btn--icon" type="button" title="Use my location">📍</button>
-        <button id="clear-btn" class="btn btn--ghost btn--icon" type="button" title="Clear" hidden>✕</button>
+        <button id="locate-btn-top" class="btn btn--locate btn--icon" type="button" title="Use my location" data-i18n="locate">📍</button>
+        <button id="clear-btn" class="btn btn--ghost btn--icon" type="button" title="Clear" data-i18n="clear" hidden>✕</button>
       </header>
 
       <p id="status" class="search__meta" role="status" aria-live="polite"></p>
@@ -130,14 +132,14 @@
       <section id="results" class="results" aria-live="polite"></section>
 
       <section id="bookmarks" class="section hidden">
-        <h2 class="section__title">Saved</h2>
+        <h2 class="section__title" data-i18n="section.saved">Saved</h2>
         <div id="bookmarks-row" class="section__row"></div>
       </section>
 
       <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-      <button id="theme-toggle" class="theme-toggle fixed right-5 top-5 z-30" type="button" title="Toggle theme" aria-label="Toggle theme">🌙</button>
-      <button id="lang-toggle" class="lang-toggle fixed right-20 top-5 z-30" type="button" title="Switch language" aria-label="Switch language" lang="en">EN</button>
+      <button id="theme-toggle" class="theme-toggle fixed right-5 top-5 z-30" type="button" title="Toggle theme" aria-label="Toggle theme" data-i18n-title="theme.toggle">🌙</button>
+      <button id="lang-toggle" class="lang-toggle fixed right-20 top-5 z-30" type="button" title="Switch language" aria-label="Switch language" data-i18n-title="lang.toggle" lang="en">EN</button>
     </main>
 
     <!-- Leaflet core (small, cached). map.ts uses window.L. -->

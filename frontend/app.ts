@@ -13,6 +13,7 @@ import { wordsOf } from '../shared/query';
 import { searchClient, ABORTED, type AddressRow } from './search';
 import { addRecent, loadBookmarks, loadLang, loadRecents, loadTheme, saveLang, saveTheme, toggleBookmark, type BookmarkRow, type Lang, type Theme } from './storage';
 import { copyCoords, hasCoords, shareAddress } from './share';
+import { t } from './i18n';
 import { renderEmpty, renderPills, renderRow, renderSkeletons, esc } from './render';
 import { addressMap } from './map';
 
@@ -98,6 +99,17 @@ function applyLang(): void {
   html.setAttribute('lang', lang);
   html.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
   els.langToggle.textContent = lang === 'ar' ? 'ع' : 'EN';
+  // Translate every static element marked with data-i18n / data-i18n-ph / data-i18n-title.
+  document.querySelectorAll<HTMLElement>('[data-i18n]').forEach((el) => {
+    el.textContent = t(el.dataset.i18n!);
+  });
+  document.querySelectorAll<HTMLElement>('[data-i18n-ph]').forEach((el) => {
+    if ('placeholder' in el) (el as HTMLInputElement).placeholder = t(el.dataset.i18nPh!);
+  });
+  document.querySelectorAll<HTMLElement>('[data-i18n-title]').forEach((el) => {
+    el.title = t(el.dataset.i18nTitle!);
+    if (el.getAttribute('aria-label') !== null) el.setAttribute('aria-label', t(el.dataset.i18nTitle!));
+  });
 }
 function toggleLang(): void {
   lang = lang === 'ar' ? 'en' : 'ar';
@@ -146,7 +158,7 @@ function renderResults(): void {
     if (mode === 'idle' && activeInput.value.trim() === '') {
       els.results.innerHTML = '';
     } else {
-      els.results.innerHTML = renderEmpty('No addresses matched your search.');
+      els.results.innerHTML = renderEmpty(t('empty.noMatch'));
     }
     return;
   }
@@ -231,7 +243,7 @@ async function runSearch(q: string): Promise<void> {
   locateDistance = null;
   userLatLng = null;
   renderResults();
-  setStatus('Searching…');
+  setStatus(t('status.searching'));
   try {
     const rows = await searchClient.search(q);
     results = rows;
@@ -241,13 +253,13 @@ async function runSearch(q: string): Promise<void> {
     renderResults();
     renderRecents();
     renderBookmarks();
-    setStatus(rows.length === 0 ? 'No matches.' : `${rows.length} result${rows.length === 1 ? '' : 's'}.`);
+    setStatus(rows.length === 0 ? t('status.noMatches') : t('status.results', rows.length));
   } catch (err) {
     if (err instanceof Error && err.message === ABORTED) return;
     mode = 'idle';
     results = [];
     renderResults();
-    setStatus(err instanceof Error ? err.message : 'Search failed.');
+    setStatus(err instanceof Error ? err.message : t('status.searchFailed'));
   }
 }
 
@@ -256,12 +268,12 @@ async function runSearch(q: string): Promise<void> {
 // ---------------------------------------------------------------------------
 function onLocate(): void {
   if (!('geolocation' in navigator)) {
-    setStatus('Geolocation is not supported by this browser.');
+    setStatus(t('status.geoUnsupported'));
     return;
   }
   els.locateBtn.disabled = true;
   els.locateBtnTop.disabled = true;
-  setStatus('Finding your location…');
+  setStatus(t('status.finding'));
   navigator.geolocation.getCurrentPosition(
     async (pos) => {
       els.locateBtn.disabled = false;
@@ -276,8 +288,8 @@ function onLocate(): void {
           mode = 'idle';
           setShell(true);
           renderResults();
-          renderEmptyInResults('No registered building within 5 km of your coordinates.');
-          setStatus('No address found within 5 km.');
+          renderEmptyInResults(t('empty.noResult'));
+          setStatus(t('status.notFound'));
           return;
         }
         results = [addr];
@@ -289,20 +301,20 @@ function onLocate(): void {
         setShell(true);
         renderResults();
         renderBookmarks();
-        setStatus('Nearest building to your location.');
+        setStatus(t('status.nearest'));
       } catch (err) {
-        setStatus(err instanceof Error ? err.message : 'Reverse geocode failed.');
+        setStatus(err instanceof Error ? err.message : t('status.reverseFailed'));
       }
     },
     (err) => {
       els.locateBtn.disabled = false;
       els.locateBtnTop.disabled = false;
       const messages: Record<number, string> = {
-        1: 'Location permission denied.',
-        2: 'Position unavailable.',
-        3: 'Finding your location timed out.',
+        1: t('status.denied'),
+        2: t('status.unavailable'),
+        3: t('status.timeout'),
       };
-      setStatus(messages[err.code] ?? `Could not get your location (${err.message}).`);
+      setStatus(messages[err.code] ?? t('status.geoError', err.message));
     },
     { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 },
   );
