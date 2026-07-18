@@ -1,0 +1,30 @@
+{
+  "name": "address-finder",
+  "private": true,
+  "version": "0.2.0",
+  "type": "module",
+  "scripts": {
+    "dev:frontend": "vite",
+    "dev:worker": "wrangler dev --config worker/wrangler.jsonc",
+    "build": "tsc -b && vite build",
+    "typecheck": "tsc -b --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "deploy": "npm run build && wrangler deploy --config worker/wrangler.jsonc"
+  },
+  "dependencies": {
+    "hono": "^4.12.0",
+    "leaflet": "^1.9.4"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260717.1",
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/leaflet": "^1.9.21",
+    "@types/node": "^26.1.1",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^5.7.2",
+    "vite": "^7.0.4",
+    "vitest": "^3.0.0",
+    "wrangler": "^4.112.0"
+  }
+}

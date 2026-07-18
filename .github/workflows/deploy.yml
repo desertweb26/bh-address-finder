@@ -1,0 +1,60 @@
+name: Deploy
+
+# Deploy to Cloudflare Workers on every push to main.
+# Schema migrations run automatically; the one-time data load
+# stays a manual step (see README).
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: # allows manual re-runs from the Actions tab
+
+# Prevent overlapping deploys from racing on rapid pushes.
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Test
+        run: npm test
+
+      - name: Build frontend
+        run: npm run build
+
+      # wrangler.jsonc is committed with a placeholder database_id; substitute
+      # the real id from the secret so d1 subcommands + deploy resolve it.
+      - name: Set database_id from secret
+        run: |
+          sed -i "s/REPLACE_WITH_YOUR_D1_DATABASE_ID/${{ secrets.D1_DATABASE_ID }}/" worker/wrangler.jsonc
+          echo "Substituted database_id in worker/wrangler.jsonc"
+
+      - name: Apply D1 migrations
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: d1 migrations apply bh-address-finder --remote --config worker/wrangler.jsonc
+
+      - name: Deploy Worker
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: deploy --config worker/wrangler.jsonc

@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Primary SEO -->
+    <title>Bahrain Address Finder — Search Any Address in Bahrain</title>
+    <meta name="description" content="Search Bahrain's national address registry in English or Arabic. Find any building, road, block or area, share a map link, and locate yourself instantly." />
+    <meta name="keywords" content="Bahrain address, Bahrain address finder, البحث عن عنوان البحرين, عنوان البحرين, Bahrain national address, بلوك البحرين, طريق البحرين" />
+    <meta name="author" content="Bahrain Address Finder" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://bh-address-finder.workers.dev/" />
+
+    <!-- Bilingual alternates: tell Google both language versions share one URL -->
+    <link rel="alternate" hreflang="en" href="https://bh-address-finder.workers.dev/" />
+    <link rel="alternate" hreflang="ar" href="https://bh-address-finder.workers.dev/" />
+    <link rel="alternate" hreflang="x-default" href="https://bh-address-finder.workers.dev/" />
+
+    <!-- Open Graph / social sharing -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Bahrain Address Finder" />
+    <meta property="og:title" content="Bahrain Address Finder — Search Any Address in Bahrain" />
+    <meta property="og:description" content="Search Bahrain's national address registry in English or Arabic. Find any building, road, block or area, and locate yourself instantly." />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:locale:alternate" content="ar_BH" />
+    <meta property="og:url" content="https://bh-address-finder.workers.dev/" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Bahrain Address Finder" />
+    <meta name="twitter:description" content="Search Bahrain's national address registry in English or Arabic." />
+
+    <!-- Structured data: WebApplication + SearchAction for Sitelinks search box -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": { "en": "Bahrain Address Finder", "ar": "البحث عن عنوان البحرين" },
+      "description": "Search Bahrain's national address registry in English or Arabic, and reverse-geocode your location.",
+      "applicationCategory": "UtilityApplication",
+      "operatingSystem": "Web",
+      "inLanguage": ["en", "ar"],
+      "url": "https://bh-address-finder.workers.dev/",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://bh-address-finder.workers.dev/?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+
+    <link rel="stylesheet" href="/app.css" />
+    <!-- Leaflet CSS (only needed when a map renders; small, cached) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" />
+  </head>
+  <body>
+    <!--
+      The shell has two modes toggled by a class on app startup:
+        .shell.shell--hero   → true hero idle state (centered, full-height)
+        .shell               → compact, topbar + results (once there's content)
+      app.ts flips the class based on whether results/search are active.
+    -->
+    <main id="shell" class="shell shell--hero">
+
+      <!-- ───────────── HERO (idle) ───────────── -->
+      <section id="hero" class="hero">
+        <h1 class="hero__title">Bahrain Address Finder</h1>
+        <p class="hero__subtitle">Find any address, share a map link, or locate yourself — instantly.</p>
+
+        <!-- Bilingual hidden copy so crawlers index both EN + AR; user-facing text stays as-is -->
+        <div class="visually-hidden" lang="ar" dir="rtl">
+          <h2>البحث عن عنوان في البحرين</h2>
+          <p>ابحث في السجل الوطني للعناوين في البحرين بالعربية أو الإنجليزية. اعثر على أي مبنى أو طريق أو مجمع أو منطقة، وشارك رابط الخريطة، أو حدد موقعك الحالي فوراً.</p>
+        </div>
+
+        <div class="search search--hero">
+          <span class="search__icon">🔍</span>
+          <input
+            id="search-input"
+            class="search__input search__input--with-kbd"
+            type="search"
+            inputmode="search"
+            autocomplete="off"
+            placeholder="Search building, road, block or area…"
+            dir="auto"
+          />
+          <span class="search__kbd">⌘&nbsp;K</span>
+        </div>
+
+        <div id="tokens" class="search__tokens" aria-hidden="true"></div>
+
+        <!-- Recent searches appear inside the hero when present -->
+        <section id="recents" class="section hidden">
+          <h2 class="section__title">Recent</h2>
+          <div id="recents-row" class="section__row"></div>
+        </section>
+
+        <!-- Saved/starred addresses appear inside the hero when present -->
+        <section id="hero-bookmarks" class="section hidden">
+          <h2 class="section__title">Saved</h2>
+          <div id="hero-bookmarks-row" class="section__row"></div>
+        </section>
+
+        <button id="locate-btn" class="btn btn--locate mt-8" type="button" title="Use my location">
+          📍&nbsp;Locate me
+        </button>
+      </section>
+
+      <!-- ───────────── TOPBAR (active state) ───────────── -->
+      <header id="topbar" class="topbar hidden">
+        <span class="topbar__brand">Bahrain AF</span>
+        <div class="search flex-1">
+          <span class="search__icon">🔍</span>
+          <input
+            id="search-input-top"
+            class="search__input"
+            type="search"
+            inputmode="search"
+            autocomplete="off"
+            placeholder="Search…"
+            dir="auto"
+          />
+        </div>
+        <button id="locate-btn-top" class="btn btn--locate btn--icon" type="button" title="Use my location">📍</button>
+        <button id="clear-btn" class="btn btn--ghost btn--icon" type="button" title="Clear" hidden>✕</button>
+      </header>
+
+      <p id="status" class="search__meta" role="status" aria-live="polite"></p>
+
+      <!-- Results + bookmarks (only shown in active mode) -->
+      <section id="results" class="results" aria-live="polite"></section>
+
+      <section id="bookmarks" class="section hidden">
+        <h2 class="section__title">Saved</h2>
+        <div id="bookmarks-row" class="section__row"></div>
+      </section>
+
+      <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+      <button id="theme-toggle" class="theme-toggle fixed right-5 top-5 z-30" type="button" title="Toggle theme" aria-label="Toggle theme">🌙</button>
+      <button id="lang-toggle" class="lang-toggle fixed right-20 top-5 z-30" type="button" title="Switch language" aria-label="Switch language" lang="en">EN</button>
+    </main>
+
+    <!-- Leaflet core (small, cached). map.ts uses window.L. -->
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script type="module" src="/app.ts"></script>
+  </body>
+</html>

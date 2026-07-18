@@ -1,0 +1,318 @@
+@import 'tailwindcss';
+
+/* ===========================================================================
+   Hero Spotlight — Linear/Raycast aesthetic.
+   Monochrome (near-black) + a single restrained indigo accent.
+   Theme tokens are defined here so utilities like bg-bg / text-accent work.
+   =========================================================================== */
+
+@theme {
+  /* Surfaces */
+  --color-bg: #08080b;
+  --color-bg-elev: #101015;
+  --color-panel: #14141b;
+  --color-panel-2: #1b1b24;
+  --color-border: #24242f;
+  --color-border-strong: #34343f;
+
+  /* Text */
+  --color-fg: #ededf2;
+  --color-fg-muted: #9a9aa8;
+  --color-fg-dim: #6b6b7b;
+
+  /* The one accent — restrained indigo */
+  --color-accent: #6366f1;
+  --color-accent-hover: #818cf8;
+  --color-accent-soft: rgba(99, 102, 241, 0.14);
+
+  /* Functional */
+  --color-star: #f5b342;
+  --color-danger: #f87171;
+
+  /* Radii + shadows */
+  --radius-card: 14px;
+  --radius-pill: 999px;
+  --shadow-card: 0 1px 0 0 rgba(255, 255, 255, 0.03) inset, 0 8px 30px rgba(0, 0, 0, 0.35);
+  --shadow-pop: 0 0 0 1px var(--color-border), 0 20px 60px rgba(0, 0, 0, 0.5);
+
+  /* Font */
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans Arabic", sans-serif;
+}
+
+[data-theme="light"] {
+  --color-bg: #fafafa;
+  --color-bg-elev: #ffffff;
+  --color-panel: #ffffff;
+  --color-panel-2: #f5f5f7;
+  --color-border: #e8e8ec;
+  --color-border-strong: #d4d4dc;
+  --color-fg: #18181b;
+  --color-fg-muted: #52525b;
+  --color-fg-dim: #71717a;
+  --color-accent-soft: rgba(99, 102, 241, 0.10);
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(0, 0, 0, 0.06);
+  --shadow-pop: 0 0 0 1px var(--color-border), 0 12px 40px rgba(0, 0, 0, 0.12);
+}
+
+/* Base */
+html, body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  transition: background-color .3s ease, color .3s ease;
+}
+
+/* Faint top vignette for depth (very subtle, not flashy). */
+body::before {
+  content: '';
+  position: fixed; inset: 0 0 auto 0; height: 320px;
+  background: radial-gradient(600px 240px at 50% -10%, var(--color-accent-soft), transparent 70%);
+  pointer-events: none; z-index: 0;
+}
+
+/* ===========================================================================
+   Component classes (@apply) — the repeated patterns.
+   =========================================================================== */
+
+@layer components {
+  /* Layout shell — centered column with the hero-shrink behavior. */
+  .shell {
+    @apply relative z-10 mx-auto w-full max-w-2xl px-5;
+  }
+  .shell--hero {
+    @apply min-h-[100svh] flex flex-col items-center justify-center pb-24;
+  }
+
+  /* Hero (idle state) */
+  .hero {
+    @apply w-full text-center flex flex-col items-center;
+    animation: hero-in .5s cubic-bezier(.16, 1, .3, 1);
+  }
+  @keyframes hero-in {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: none; }
+  }
+  .hero__kicker {
+    @apply mb-5 inline-flex items-center gap-2 rounded-full border border-border px-3 py-1 text-xs font-medium text-fg-dim;
+  }
+  .hero__title {
+    @apply text-4xl sm:text-5xl font-semibold tracking-tight text-fg;
+    letter-spacing: -0.02em;
+  }
+  .hero__subtitle {
+    @apply mt-3 text-[0.95rem] text-fg-muted;
+  }
+
+  /* Compact header (when results are showing) */
+  .topbar {
+    @apply sticky top-0 z-20 -mx-5 mb-6 px-5 py-4 flex items-center gap-3
+           bg-bg/80 backdrop-blur-xl border-b border-border;
+  }
+  .topbar__brand {
+    @apply font-semibold tracking-tight text-fg;
+    letter-spacing: -0.01em;
+  }
+
+  /* Search */
+  .search {
+    @apply relative w-full;
+  }
+  .search--hero {
+    @apply mt-8 max-w-xl mx-auto;
+  }
+  .search__icon {
+    @apply absolute left-4 top-1/2 -translate-y-1/2 text-fg-dim pointer-events-none;
+  }
+  .search__input {
+    @apply w-full rounded-[var(--radius-pill)] border border-border bg-panel
+           py-3.5 pl-11 pr-5 text-[0.95rem] text-fg placeholder:text-fg-dim
+           outline-none transition
+           focus:border-accent focus:ring-4 focus:ring-[var(--color-accent-soft)];
+  }
+  /* Hero input reserves room on the right for the ⌘K badge. */
+  .search__input--with-kbd {
+    @apply sm:pr-16;
+  }
+  .search__kbd {
+    @apply absolute right-3 top-1/2 -translate-y-1/2 hidden sm:flex items-center gap-1
+           rounded-md border border-border px-1.5 py-0.5 text-[10px] font-medium text-fg-dim;
+  }
+  .search__tokens {
+    @apply mt-3 flex flex-wrap justify-center gap-1.5 min-h-0;
+  }
+  .search__tokens:empty { @apply hidden; }
+  .search__token {
+    @apply rounded-full bg-panel-2 px-2.5 py-0.5 text-[0.78rem] text-fg-muted;
+  }
+  .search__meta {
+    @apply mt-3 flex items-center justify-between gap-3 text-xs text-fg-dim;
+  }
+  .search__clear {
+    @apply underline decoration-dotted underline-offset-2 hover:text-fg cursor-pointer;
+  }
+
+  /* Buttons */
+  .btn {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-[var(--radius-pill)]
+           px-4 py-2 text-[0.85rem] font-medium transition
+           disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+  .btn--locate {
+    @apply bg-panel text-fg border border-border hover:bg-panel-2;
+  }
+  .btn--share {
+    @apply bg-accent text-white hover:bg-accent-hover;
+  }
+  .btn--ghost {
+    @apply bg-transparent text-fg-muted border border-border hover:bg-panel-2 hover:text-fg;
+  }
+  .btn--icon {
+    @apply px-2.5 py-2;
+  }
+
+  /* Example / pill chips */
+  .examples {
+    @apply mt-5 flex flex-wrap items-center justify-center gap-2 text-xs text-fg-dim;
+  }
+  .example {
+    @apply rounded-full border border-border bg-panel/50 px-2.5 py-1
+           transition hover:border-border-strong hover:text-fg-muted cursor-pointer;
+  }
+  .pill {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-border bg-panel
+           px-3 py-1 text-xs text-fg-muted transition hover:border-accent hover:text-fg cursor-pointer;
+  }
+  .pill__remove {
+    @apply opacity-50 hover:opacity-100 hover:text-danger;
+  }
+
+  /* Section headers */
+  .section {
+    @apply mt-8;
+  }
+  .section__title {
+    @apply mb-3 text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-fg-dim;
+  }
+  .section__row {
+    @apply flex flex-wrap gap-2;
+  }
+
+  /* Results */
+  .results {
+    @apply mt-6 flex flex-col gap-2.5;
+  }
+
+  @keyframes card-in {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: none; }
+  }
+  .result {
+    @apply rounded-[var(--radius-card)] border border-border bg-panel p-5
+           transition duration-150;
+    animation: card-in .25s ease-out;
+  }
+  .result--selected {
+    @apply border-accent;
+    box-shadow: var(--shadow-card), 0 0 0 3px var(--color-accent-soft);
+  }
+  .result:hover:not(.result--selected) {
+    @apply border-border-strong;
+  }
+
+  .result__chips {
+    @apply flex flex-wrap gap-1.5 mb-3;
+  }
+  .chip {
+    @apply inline-flex items-center gap-1 rounded-md bg-panel-2 px-2 py-0.5
+           text-[0.75rem] font-medium text-fg-muted tabular-nums;
+  }
+  .result__en {
+    @apply m-0 font-semibold text-fg leading-snug;
+  }
+  .result__ar {
+    @apply mt-0.5 text-fg-muted;
+  }
+  .result__coords {
+    @apply mt-2 font-mono text-[0.72rem] text-fg-dim;
+  }
+  .result__dist {
+    @apply ml-2 text-accent font-semibold font-sans;
+  }
+  .result__actions {
+    @apply mt-4 flex flex-wrap items-center gap-2;
+  }
+  .result__star {
+    @apply ml-auto text-lg leading-none text-fg-dim transition hover:scale-110;
+  }
+  .result__star.is-saved { @apply text-star; }
+
+  .result__map {
+    @apply mt-4 h-56 w-full overflow-hidden rounded-[10px] border border-border;
+  }
+
+  .result__empty {
+    @apply rounded-[var(--radius-card)] border border-dashed border-border-strong
+           bg-panel/40 p-10 text-center text-fg-muted;
+  }
+
+  /* Skeletons */
+  .skeleton {
+    @apply rounded-[var(--radius-card)] border border-border bg-panel p-5;
+  }
+  .skeleton__line {
+    @apply mb-2.5 h-3 rounded-full;
+    background: linear-gradient(90deg, var(--color-panel-2) 25%, var(--color-border) 37%, var(--color-panel-2) 63%);
+    background-size: 400% 100%;
+    animation: shimmer 1.3s ease-in-out infinite;
+  }
+  .skeleton__line--w70 { @apply w-[70%]; }
+  .skeleton__line--w40 { @apply w-[40%]; }
+  @keyframes shimmer {
+    0% { background-position: 100% 0; }
+    100% { background-position: -100% 0; }
+  }
+
+  /* Toast */
+  .toast {
+    @apply fixed bottom-7 left-1/2 -translate-x-1/2 z-50
+           rounded-full px-4 py-2 text-[0.85rem]
+           opacity-0 pointer-events-none transition duration-200
+           bg-fg text-bg;
+    box-shadow: var(--shadow-pop);
+  }
+  .toast.is-visible {
+    @apply opacity-100;
+    transform: translate(-50%, -4px);
+  }
+
+  /* Theme toggle */
+  .theme-toggle {
+    @apply flex-none rounded-full border border-border bg-panel/60 px-3 py-1.5
+           text-sm transition hover:bg-panel-2;
+  }
+
+  /* Language toggle (sits left of the theme toggle) */
+  .lang-toggle {
+    @apply flex-none rounded-full border border-border bg-panel/60 px-3 py-1.5
+           text-sm font-semibold transition hover:bg-panel-2;
+  }
+
+  /* Leaflet attribution fit */
+  .leaflet-container { background: var(--color-panel-2); }
+  .leaflet-control-attribution { font-size: 10px; background: rgba(0,0,0,.3); color: var(--color-fg-dim); }
+  .leaflet-control-attribution a { color: var(--color-fg-muted); }
+
+  /* SEO: text present for crawlers but hidden from the visual UI */
+  .visually-hidden {
+    position: absolute;
+    width: 1px; height: 1px;
+    padding: 0; margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+}

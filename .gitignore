@@ -1,0 +1,17 @@
+/frontend-dist
+/.tsbuildinfo
+*.tsbuildinfo
+node_modules
+*.log
+.DS_Store
+.wrangler
+.dev.vars
+
+# The export/ directory holds the data dump + export scripts (regenerable,
+# contains a large SQL file) — not part of the published source.
+/export
+
+# wrangler.jsonc holds the real D1 database_id (a credential). The committed
+# worker/wrangler.jsonc.example is the template; copy it to wrangler.jsonc and
+# fill in the id locally. Never commit the real config.
+/worker/wrangler.jsonc
