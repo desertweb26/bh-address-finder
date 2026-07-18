@@ -40,12 +40,13 @@ jobs:
         env:
           VITE_SITE_URL: ${{ secrets.SITE_URL }}
 
-      # wrangler.jsonc is committed with a ${D1_DATABASE_ID} placeholder; substitute
-      # the real id from the secret so d1 subcommands + deploy resolve it.
-      - name: Set database_id from secret
+      # wrangler.jsonc is gitignored (holds the real D1 id), so generate it from
+      # the committed example and substitute the real id from the secret.
+      - name: Generate wrangler.jsonc from secret
         run: |
+          cp worker/wrangler.jsonc.example worker/wrangler.jsonc
           sed -i 's/\${D1_DATABASE_ID}/${{ secrets.D1_DATABASE_ID }}/' worker/wrangler.jsonc
-          echo "Substituted database_id in worker/wrangler.jsonc"
+          echo "Generated worker/wrangler.jsonc with database_id"
 
       - name: Apply D1 migrations
         uses: cloudflare/wrangler-action@v3
