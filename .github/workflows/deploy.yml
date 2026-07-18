@@ -37,12 +37,14 @@ jobs:
 
       - name: Build frontend
         run: npm run build
+        env:
+          VITE_SITE_URL: ${{ secrets.SITE_URL }}
 
-      # wrangler.jsonc is committed with a placeholder database_id; substitute
+      # wrangler.jsonc is committed with a ${D1_DATABASE_ID} placeholder; substitute
       # the real id from the secret so d1 subcommands + deploy resolve it.
       - name: Set database_id from secret
         run: |
-          sed -i "s/REPLACE_WITH_YOUR_D1_DATABASE_ID/${{ secrets.D1_DATABASE_ID }}/" worker/wrangler.jsonc
+          sed -i 's/\${D1_DATABASE_ID}/${{ secrets.D1_DATABASE_ID }}/' worker/wrangler.jsonc
           echo "Substituted database_id in worker/wrangler.jsonc"
 
       - name: Apply D1 migrations

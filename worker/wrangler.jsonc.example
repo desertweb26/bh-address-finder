@@ -1,0 +1,22 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "bh-address-finder",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-07-17",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": "../frontend-dist",
+    "binding": "ASSETS"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "bh-address-finder",
+      "database_id": "${D1_DATABASE_ID}",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "observability": {
+    "enabled": true
+  }
+}
