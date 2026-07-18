@@ -1,11 +1,11 @@
 name: Deploy
 
-# Deploy to Cloudflare Workers on every push to main.
+# Deploy to Cloudflare Workers on every push to master.
 # Schema migrations run automatically; the one-time data load
 # stays a manual step (see README).
 on:
   push:
-    branches: [main]
+    branches: [master]
   workflow_dispatch: # allows manual re-runs from the Actions tab
 
 # Prevent overlapping deploys from racing on rapid pushes.
